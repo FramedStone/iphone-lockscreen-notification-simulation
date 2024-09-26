@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BackgroundImageUpload } from "./iphone-notification/background-image-upload";
 import { NotificationForm } from "./iphone-notification/notification-form";
 import { NotificationList } from "./iphone-notification/notification-list";
@@ -41,24 +41,47 @@ export default function IPhoneNotification() {
     return () => clearInterval(timer);
   }, []);
 
-  const addNotification = (notification: Notification) => {
-    setNotifications([...notifications, notification]);
-  };
+  const addNotification = useCallback((notification: Notification) => {
+    setNotifications((prevNotifications) => [
+      ...prevNotifications,
+      notification,
+    ]);
+  }, []);
 
-  const removeNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
-  };
+  const removeNotification = useCallback((id: string) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((n) => n.id !== id)
+    );
+  }, []);
 
-  const swapNotifications = (fromIndex: number, toIndex: number) => {
-    const newNotifications = [...notifications];
-    const [removed] = newNotifications.splice(fromIndex, 1);
-    newNotifications.splice(toIndex, 0, removed);
-    setNotifications(newNotifications);
-  };
+  const swapNotifications = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      setNotifications((prevNotifications) => {
+        const newNotifications = [...prevNotifications];
+        const [removed] = newNotifications.splice(fromIndex, 1);
+        newNotifications.splice(toIndex, 0, removed);
+        return newNotifications;
+      });
+    },
+    []
+  );
 
-  const handleScrollbarDrag = (percentage: number) => {
+  const editNotification = useCallback(
+    (id: string, updatedNotification: Partial<Notification>) => {
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification.id === id
+            ? { ...notification, ...updatedNotification }
+            : notification
+        )
+      );
+    },
+    []
+  );
+
+  const handleScrollbarDrag = useCallback((percentage: number) => {
     setNotificationYOffset(Math.round(percentage * 932));
-  };
+  }, []);
 
   return (
     <div className="flex items-start justify-center min-h-screen bg-gray-100 p-8">
@@ -175,6 +198,7 @@ export default function IPhoneNotification() {
                 notifications={notifications}
                 onRemoveNotification={removeNotification}
                 onSwapNotifications={swapNotifications}
+                onEditNotification={editNotification}
                 notificationYOffset={notificationYOffset}
               />
             </div>

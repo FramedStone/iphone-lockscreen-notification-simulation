@@ -1,15 +1,13 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { formatTimestamp } from "@/lib/utils";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ChevronUp, ChevronDown, Trash2, Edit } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -24,6 +22,10 @@ interface NotificationListProps {
   notifications: Notification[];
   onRemoveNotification: (id: string) => void;
   onSwapNotifications: (fromIndex: number, toIndex: number) => void;
+  onEditNotification: (
+    id: string,
+    updatedNotification: Partial<Notification>
+  ) => void;
   notificationYOffset: number;
 }
 
@@ -31,175 +33,204 @@ export function NotificationList({
   notifications,
   onRemoveNotification,
   onSwapNotifications,
+  onEditNotification,
   notificationYOffset,
 }: NotificationListProps) {
-  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const [deletingNotification, setDeletingNotification] =
+  const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
-  const draggedItemRef = useRef<HTMLDivElement | null>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-  const dragStartX = useRef<number>(0);
-  const dragStartY = useRef<number>(0);
-  const isDragging = useRef(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedNotification, setEditedNotification] = useState<
+    Partial<Notification>
+  >({});
 
-  const handleDragStart = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>, index: number) => {
-      setDraggingIndex(index);
-      dragStartX.current = e.clientX;
-      dragStartY.current = e.clientY;
-      draggedItemRef.current = e.currentTarget;
-      isDragging.current = true;
-      if (draggedItemRef.current) {
-        draggedItemRef.current.style.opacity = "0.5";
-        draggedItemRef.current.style.zIndex = "10";
+  const handleNotificationClick = (notification: Notification) => {
+    setSelectedNotification(notification);
+    setIsEditMode(false);
+  };
+
+  const handleSwapUp = () => {
+    if (selectedNotification) {
+      const currentIndex = notifications.findIndex(
+        (n) => n.id === selectedNotification.id
+      );
+      if (currentIndex > 0) {
+        onSwapNotifications(currentIndex, currentIndex - 1);
       }
-    },
-    []
-  );
-
-  const handleDrag = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (
-        draggingIndex === null ||
-        !draggedItemRef.current ||
-        !isDragging.current ||
-        !listRef.current
-      )
-        return;
-
-      const deltaX = e.clientX - dragStartX.current;
-      const deltaY = e.clientY - dragStartY.current;
-      draggedItemRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-
-      // Check if dragged out of the iPhone frame
-      const iPhoneFrame = listRef.current.closest(".iphone-frame");
-      if (iPhoneFrame) {
-        const frameRect = iPhoneFrame.getBoundingClientRect();
-        const itemRect = draggedItemRef.current.getBoundingClientRect();
-
-        if (
-          itemRect.right < frameRect.left ||
-          itemRect.left > frameRect.right ||
-          itemRect.bottom < frameRect.top ||
-          itemRect.top > frameRect.bottom
-        ) {
-          setDeletingNotification(notifications[draggingIndex]);
-          handleDragEnd();
-          return;
-        }
-      }
-
-      // Swapping logic
-      const itemHeight = draggedItemRef.current.offsetHeight;
-      const listRect = listRef.current.getBoundingClientRect();
-      const draggedItemTop = itemRect.top - listRect.top + deltaY;
-      const newIndex = Math.floor(draggedItemTop / itemHeight);
-
-      if (
-        newIndex !== draggingIndex &&
-        newIndex >= 0 &&
-        newIndex < notifications.length
-      ) {
-        onSwapNotifications(draggingIndex, newIndex);
-        setDraggingIndex(newIndex);
-      }
-    },
-    [draggingIndex, notifications, onSwapNotifications]
-  );
-
-  const handleDragEnd = useCallback(() => {
-    if (draggedItemRef.current) {
-      draggedItemRef.current.style.opacity = "1";
-      draggedItemRef.current.style.transform = "translate(0, 0)";
-      draggedItemRef.current.style.zIndex = "auto";
+      setSelectedNotification(null);
     }
-    setDraggingIndex(null);
-    isDragging.current = false;
-  }, []);
+  };
 
-  const handleDeleteConfirm = useCallback(() => {
-    if (deletingNotification) {
-      onRemoveNotification(deletingNotification.id);
-      setDeletingNotification(null);
-    }
-  }, [deletingNotification, onRemoveNotification]);
-
-  useEffect(() => {
-    const handleMouseUp = () => {
-      if (isDragging.current) {
-        handleDragEnd();
+  const handleSwapDown = () => {
+    if (selectedNotification) {
+      const currentIndex = notifications.findIndex(
+        (n) => n.id === selectedNotification.id
+      );
+      if (currentIndex < notifications.length - 1) {
+        onSwapNotifications(currentIndex, currentIndex + 1);
       }
-    };
+      setSelectedNotification(null);
+    }
+  };
 
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [handleDragEnd]);
+  const handleDelete = () => {
+    if (selectedNotification) {
+      onRemoveNotification(selectedNotification.id);
+      setSelectedNotification(null);
+    }
+  };
+
+  const handleEdit = () => {
+    if (selectedNotification) {
+      setEditedNotification({
+        sender: selectedNotification.sender,
+        message: selectedNotification.message,
+        timestamp: selectedNotification.timestamp,
+      });
+      setIsEditMode(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (selectedNotification && editedNotification) {
+      onEditNotification(selectedNotification.id, editedNotification);
+      setIsEditMode(false);
+      setSelectedNotification(null);
+    }
+  };
 
   return (
-    <>
-      <div
-        ref={listRef}
-        className="absolute inset-x-0 space-y-4 px-4"
-        style={{ top: `${notificationYOffset}px` }}
-      >
-        {notifications.map((notification, index) => (
-          <div
-            key={notification.id}
-            className="bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg p-4 cursor-move"
-            onMouseDown={(e) => handleDragStart(e, index)}
-            onMouseMove={handleDrag}
-          >
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
-                {notification.profilePicture ? (
-                  <img
-                    src={notification.profilePicture}
-                    alt={notification.sender}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  notification.sender.charAt(0).toUpperCase()
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <div className="font-semibold text-white">
-                    {notification.sender}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {formatTimestamp(notification)}
-                  </div>
+    <div
+      className="absolute inset-x-0 space-y-4 px-4"
+      style={{ top: `${notificationYOffset}px` }}
+    >
+      {notifications.map((notification, index) => (
+        <Popover
+          key={notification.id}
+          open={selectedNotification?.id === notification.id}
+          onOpenChange={(isOpen) => !isOpen && setSelectedNotification(null)}
+        >
+          <PopoverTrigger asChild>
+            <div
+              className="bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg p-4 cursor-pointer"
+              onClick={() => handleNotificationClick(notification)}
+            >
+              <div className="flex items-start space-x-3">
+                <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+                  {notification.profilePicture ? (
+                    <img
+                      src={notification.profilePicture}
+                      alt={notification.sender}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    notification.sender.charAt(0).toUpperCase()
+                  )}
                 </div>
-                <div className="text-sm text-gray-300 mt-1">
-                  {notification.message}
+                <div className="flex-1">
+                  <div className="flex justify-between items-center">
+                    <div className="font-semibold text-white">
+                      {notification.sender}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {formatTimestamp(notification)}
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-300 mt-1">
+                    {notification.message}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-      <AlertDialog
-        open={!!deletingNotification}
-        onOpenChange={() => setDeletingNotification(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Notification</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this notification? This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+          </PopoverTrigger>
+          <PopoverContent className="w-64">
+            {isEditMode ? (
+              <div className="flex flex-col space-y-2">
+                <Input
+                  value={editedNotification.sender}
+                  onChange={(e) =>
+                    setEditedNotification({
+                      ...editedNotification,
+                      sender: e.target.value,
+                    })
+                  }
+                  placeholder="Sender"
+                  className="w-full"
+                />
+                <Input
+                  value={editedNotification.message}
+                  onChange={(e) =>
+                    setEditedNotification({
+                      ...editedNotification,
+                      message: e.target.value,
+                    })
+                  }
+                  placeholder="Message"
+                  className="w-full"
+                />
+                <Input
+                  type="datetime-local"
+                  value={
+                    editedNotification.timestamp
+                      ? new Date(editedNotification.timestamp)
+                          .toISOString()
+                          .slice(0, 16)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    setEditedNotification({
+                      ...editedNotification,
+                      timestamp: new Date(e.target.value),
+                    })
+                  }
+                  className="w-full"
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditMode(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveEdit}>Save</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-2">
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={handleSwapUp}
+                  disabled={index === 0}
+                >
+                  <ChevronUp className="mr-2 h-4 w-4" /> Move Up
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={handleSwapDown}
+                  disabled={index === notifications.length - 1}
+                >
+                  <ChevronDown className="mr-2 h-4 w-4" /> Move Down
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={handleEdit}
+                >
+                  <Edit className="mr-2 h-4 w-4" /> Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="justify-start text-red-500"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      ))}
+    </div>
   );
 }
