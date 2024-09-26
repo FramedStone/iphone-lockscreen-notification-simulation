@@ -28,6 +28,7 @@ export default function IPhoneNotification() {
     "/placeholder.svg?height=932&width=430"
   );
   const [backgroundBlur, setBackgroundBlur] = useState(0);
+  const [backgroundSize, setBackgroundSize] = useState(100);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [statusBarPadding, setStatusBarPadding] = useState(33);
   const [dynamicIslandMargin, setDynamicIslandMargin] = useState(15);
@@ -84,6 +85,21 @@ export default function IPhoneNotification() {
           <div className="text-sm text-gray-500">{backgroundBlur}px</div>
         </div>
         <div>
+          <Label htmlFor="backgroundSize" className="text-black">
+            Background Size
+          </Label>
+          <Slider
+            id="backgroundSize"
+            min={50}
+            max={150}
+            step={1}
+            value={[backgroundSize]}
+            onValueChange={(value) => setBackgroundSize(value[0])}
+            className="my-2"
+          />
+          <div className="text-sm text-gray-500">{backgroundSize}%</div>
+        </div>
+        <div>
           <Label htmlFor="statusBarPadding" className="text-black">
             Status Bar Padding (px)
           </Label>
@@ -131,7 +147,11 @@ export default function IPhoneNotification() {
             src={backgroundImage}
             alt="iPhone background"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ filter: `blur(${backgroundBlur}px)` }}
+            style={{
+              filter: `blur(${backgroundBlur}px)`,
+              transform: `scale(${backgroundSize / 100})`,
+              transformOrigin: "center",
+            }}
           />
           <div className="absolute inset-0 flex flex-col">
             <StatusBar
