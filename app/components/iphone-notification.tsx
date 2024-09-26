@@ -97,8 +97,8 @@ export default function IPhoneNotification() {
           </Label>
           <Slider
             id="backgroundSize"
-            min={50}
-            max={150}
+            min={100}
+            max={200}
             step={1}
             value={[backgroundSize]}
             onValueChange={(value) => setBackgroundSize(value[0])}
@@ -150,16 +150,18 @@ export default function IPhoneNotification() {
           className="relative w-[430px] h-[932px] rounded-[68px] overflow-hidden shadow-xl bg-black"
           style={{ boxShadow: "0 0 0 4px rgba(0,0,0,0.7)" }}
         >
-          <img
-            src={backgroundImage}
-            alt="iPhone background"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              filter: `blur(${backgroundBlur}px)`,
-              transform: `scale(${backgroundSize / 100})`,
-              transformOrigin: "center",
-            }}
-          />
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={backgroundImage}
+              alt="iPhone background"
+              className="absolute w-full h-full object-cover"
+              style={{
+                filter: `blur(${backgroundBlur}px)`,
+                transform: `scale(${backgroundSize / 100})`,
+                transformOrigin: "center",
+              }}
+            />
+          </div>
           <div className="absolute inset-0 flex flex-col">
             <StatusBar
               mobileNetwork={mobileNetwork}
