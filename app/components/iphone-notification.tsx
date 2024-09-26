@@ -52,28 +52,34 @@ export default function IPhoneNotification() {
 
   return (
     <div className="flex items-start justify-center min-h-screen bg-gray-100 p-8">
-      <div className="w-full max-w-md space-y-4 mr-8">
+      <div className="w-full max-w-md space-y-4 mr-8 text-black">
         <div>
-          <Label htmlFor="mobileNetwork">Mobile Network</Label>
+          <Label htmlFor="mobileNetwork" className="text-black">
+            Mobile Network
+          </Label>
           <Input
             id="mobileNetwork"
             value={mobileNetwork}
             onChange={(e) => setMobileNetwork(e.target.value)}
             placeholder="Enter mobile network name"
+            className="text-black placeholder-gray-500"
           />
         </div>
         <BackgroundImageUpload onImageChange={setBackgroundImage} />
         <div>
-          <Label htmlFor="statusBarPadding">Status Bar Padding (px)</Label>
+          <Label htmlFor="statusBarPadding" className="text-black">
+            Status Bar Padding (px)
+          </Label>
           <Input
             id="statusBarPadding"
             type="number"
             value={statusBarPadding}
             onChange={(e) => setStatusBarPadding(Number(e.target.value))}
+            className="text-black"
           />
         </div>
         <div>
-          <Label htmlFor="dynamicIslandMargin">
+          <Label htmlFor="dynamicIslandMargin" className="text-black">
             Dynamic Island Margin Top (px)
           </Label>
           <Input
@@ -81,15 +87,19 @@ export default function IPhoneNotification() {
             type="number"
             value={dynamicIslandMargin}
             onChange={(e) => setDynamicIslandMargin(Number(e.target.value))}
+            className="text-black"
           />
         </div>
         <div>
-          <Label htmlFor="bottomIconsPadding">Bottom Icons Padding (px)</Label>
+          <Label htmlFor="bottomIconsPadding" className="text-black">
+            Bottom Icons Padding (px)
+          </Label>
           <Input
             id="bottomIconsPadding"
             type="number"
             value={bottomIconsPadding}
             onChange={(e) => setBottomIconsPadding(Number(e.target.value))}
+            className="text-black"
           />
         </div>
         <NotificationForm onAddNotification={addNotification} />
@@ -105,7 +115,7 @@ export default function IPhoneNotification() {
             alt="iPhone background"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 flex flex-col bg-black/30 backdrop-blur-sm">
+          <div className="absolute inset-0 flex flex-col">
             <StatusBar
               mobileNetwork={mobileNetwork}
               statusBarPadding={statusBarPadding}

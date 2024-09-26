@@ -58,23 +58,29 @@ export function NotificationForm({ onAddNotification }: NotificationFormProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-black">
       <div>
-        <Label htmlFor="newSender">New Notification Sender</Label>
+        <Label htmlFor="newSender" className="text-black">
+          New Notification Sender
+        </Label>
         <Input
           id="newSender"
           value={newSender}
           onChange={(e) => setNewSender(e.target.value)}
           placeholder="Enter sender name"
+          className="text-black placeholder-gray-500"
         />
       </div>
       <div>
-        <Label htmlFor="newMessage">New Notification Message</Label>
+        <Label htmlFor="newMessage" className="text-black">
+          New Notification Message
+        </Label>
         <Textarea
           id="newMessage"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Enter message"
+          className="text-black placeholder-gray-500"
         />
       </div>
       <div className="space-y-2">
@@ -84,7 +90,9 @@ export function NotificationForm({ onAddNotification }: NotificationFormProps) {
             checked={useCurrentTime}
             onCheckedChange={(checked) => setUseCurrentTime(checked as boolean)}
           />
-          <Label htmlFor="useCurrentTime">Use current time</Label>
+          <Label htmlFor="useCurrentTime" className="text-black">
+            Use current time
+          </Label>
         </div>
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -92,11 +100,15 @@ export function NotificationForm({ onAddNotification }: NotificationFormProps) {
             checked={showAsNow}
             onCheckedChange={(checked) => setShowAsNow(checked as boolean)}
           />
-          <Label htmlFor="showAsNow">Show as &quot;now&quot;</Label>
+          <Label htmlFor="showAsNow" className="text-black">
+            Show as "now"
+          </Label>
         </div>
         {!useCurrentTime && !showAsNow && (
           <div>
-            <Label htmlFor="newTimestamp">New Notification Timestamp</Label>
+            <Label htmlFor="newTimestamp" className="text-black">
+              New Notification Timestamp
+            </Label>
             <DatePicker
               selected={newTimestamp}
               onChange={handleDateChange}
@@ -105,14 +117,14 @@ export function NotificationForm({ onAddNotification }: NotificationFormProps) {
               timeIntervals={15}
               timeCaption="time"
               dateFormat="MMMM d, yyyy h:mm aa"
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
               placeholderText="Select date and time"
             />
           </div>
         )}
       </div>
       <div>
-        <Label htmlFor="newProfilePicture">
+        <Label htmlFor="newProfilePicture" className="text-black">
           New Notification Profile Picture
         </Label>
         <Input
@@ -120,9 +132,15 @@ export function NotificationForm({ onAddNotification }: NotificationFormProps) {
           type="file"
           accept="image/*"
           onChange={handleImageChange}
+          className="text-black"
         />
       </div>
-      <Button onClick={handleAddNotification}>Add Notification</Button>
+      <Button
+        onClick={handleAddNotification}
+        className="bg-blue-500 text-white"
+      >
+        Add Notification
+      </Button>
     </div>
   );
 }

@@ -22,12 +22,15 @@ export function BackgroundImageUpload({
 
   return (
     <div>
-      <Label htmlFor="background">Background Image</Label>
+      <Label htmlFor="background" className="text-black">
+        Background Image
+      </Label>
       <Input
         id="background"
         type="file"
         accept="image/*"
         onChange={handleImageChange}
+        className="text-black"
       />
     </div>
   );
