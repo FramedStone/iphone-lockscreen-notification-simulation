@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { formatTimestamp } from "@/lib/utils";
 
 interface Notification {
@@ -26,45 +26,67 @@ export function NotificationList({
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const draggedItemRef = useRef<HTMLDivElement | null>(null);
   const dragStartY = useRef<number>(0);
+  const isDragging = useRef(false);
 
-  const handleDragStart = (
-    e: React.MouseEvent<HTMLDivElement>,
-    index: number
-  ) => {
-    setDraggingIndex(index);
-    dragStartY.current = e.clientY;
-    draggedItemRef.current = e.currentTarget;
-    if (draggedItemRef.current) {
-      draggedItemRef.current.style.opacity = "0.5";
-    }
-  };
-
-  const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (draggingIndex === null || !draggedItemRef.current) return;
-
-    const deltaY = e.clientY - dragStartY.current;
-    draggedItemRef.current.style.transform = `translateY(${deltaY}px)`;
-
-    const itemHeight = draggedItemRef.current.offsetHeight;
-    const swapThreshold = itemHeight / 2;
-
-    if (Math.abs(deltaY) > swapThreshold) {
-      const newIndex = draggingIndex + (deltaY > 0 ? 1 : -1);
-      if (newIndex >= 0 && newIndex < notifications.length) {
-        onSwapNotifications(draggingIndex, newIndex);
-        setDraggingIndex(newIndex);
-        dragStartY.current = e.clientY;
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>, index: number) => {
+      setDraggingIndex(index);
+      dragStartY.current = e.clientY;
+      draggedItemRef.current = e.currentTarget;
+      isDragging.current = true;
+      if (draggedItemRef.current) {
+        draggedItemRef.current.style.opacity = "0.5";
+        draggedItemRef.current.style.zIndex = "10";
       }
-    }
-  };
+    },
+    []
+  );
 
-  const handleDragEnd = () => {
+  const handleDrag = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (
+        draggingIndex === null ||
+        !draggedItemRef.current ||
+        !isDragging.current
+      )
+        return;
+
+      const deltaY = e.clientY - dragStartY.current;
+      draggedItemRef.current.style.transform = `translateY(${deltaY}px)`;
+
+      const itemHeight = draggedItemRef.current.offsetHeight;
+      const swapThreshold = itemHeight / 2;
+
+      if (Math.abs(deltaY) > swapThreshold) {
+        const newIndex = draggingIndex + (deltaY > 0 ? 1 : -1);
+        if (newIndex >= 0 && newIndex < notifications.length) {
+          onSwapNotifications(draggingIndex, newIndex);
+          setDraggingIndex(newIndex);
+          dragStartY.current = e.clientY;
+        }
+      }
+    },
+    [draggingIndex, notifications.length, onSwapNotifications]
+  );
+
+  const handleDragEnd = useCallback(() => {
     if (draggedItemRef.current) {
       draggedItemRef.current.style.opacity = "1";
       draggedItemRef.current.style.transform = "translateY(0)";
+      draggedItemRef.current.style.zIndex = "auto";
     }
     setDraggingIndex(null);
-  };
+    isDragging.current = false;
+  }, []);
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>, id: string) => {
+      if (!isDragging.current) {
+        onRemoveNotification(id);
+      }
+    },
+    [onRemoveNotification]
+  );
 
   return (
     <div
@@ -79,7 +101,7 @@ export function NotificationList({
           onMouseMove={handleDrag}
           onMouseUp={handleDragEnd}
           onMouseLeave={handleDragEnd}
-          onClick={() => onRemoveNotification(notification.id)}
+          onClick={(e) => handleClick(e, notification.id)}
         >
           <div className="flex items-start space-x-3">
             <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
