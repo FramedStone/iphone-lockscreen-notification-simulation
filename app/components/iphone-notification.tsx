@@ -51,7 +51,7 @@ export default function IPhoneNotification() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex items-start justify-center min-h-screen bg-gray-100 p-8">
       <div className="w-full max-w-md space-y-4 mr-8">
         <div>
           <Label htmlFor="mobileNetwork">Mobile Network</Label>
@@ -95,39 +95,41 @@ export default function IPhoneNotification() {
         <NotificationForm onAddNotification={addNotification} />
       </div>
 
-      <div
-        className="relative w-[430px] h-[932px] rounded-[68px] overflow-hidden shadow-xl bg-black"
-        style={{ boxShadow: "0 0 0 4px rgba(0,0,0,0.7)" }}
-      >
-        <img
-          src={backgroundImage}
-          alt="iPhone background"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 flex flex-col bg-black/30 backdrop-blur-sm">
-          <StatusBar
-            mobileNetwork={mobileNetwork}
-            statusBarPadding={statusBarPadding}
+      <div className="flex items-start">
+        <div
+          className="relative w-[430px] h-[932px] rounded-[68px] overflow-hidden shadow-xl bg-black"
+          style={{ boxShadow: "0 0 0 4px rgba(0,0,0,0.7)" }}
+        >
+          <img
+            src={backgroundImage}
+            alt="iPhone background"
+            className="absolute inset-0 w-full h-full object-cover"
           />
-          <DynamicIsland dynamicIslandMargin={dynamicIslandMargin} />
-
-          <div className="flex-1 flex flex-col justify-between p-8">
-            <LockScreen currentTime={currentTime} />
-            <NotificationList
-              notifications={notifications}
-              onRemoveNotification={removeNotification}
-              notificationYOffset={notificationYOffset}
+          <div className="absolute inset-0 flex flex-col bg-black/30 backdrop-blur-sm">
+            <StatusBar
+              mobileNetwork={mobileNetwork}
+              statusBarPadding={statusBarPadding}
             />
+            <DynamicIsland dynamicIslandMargin={dynamicIslandMargin} />
+
+            <div className="flex-1 flex flex-col justify-between p-8">
+              <LockScreen currentTime={currentTime} />
+              <NotificationList
+                notifications={notifications}
+                onRemoveNotification={removeNotification}
+                notificationYOffset={notificationYOffset}
+              />
+            </div>
+
+            <BottomIcons bottomIconsPadding={bottomIconsPadding} />
           </div>
-
-          <BottomIcons bottomIconsPadding={bottomIconsPadding} />
         </div>
-      </div>
 
-      <DraggableScrollbar
-        notificationYOffset={notificationYOffset}
-        onScrollbarDrag={handleScrollbarDrag}
-      />
+        <DraggableScrollbar
+          notificationYOffset={notificationYOffset}
+          onScrollbarDrag={handleScrollbarDrag}
+        />
+      </div>
     </div>
   );
 }

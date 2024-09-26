@@ -92,7 +92,7 @@ export function NotificationForm({ onAddNotification }: NotificationFormProps) {
             checked={showAsNow}
             onCheckedChange={(checked) => setShowAsNow(checked as boolean)}
           />
-          <Label htmlFor="showAsNow">Show as "now"</Label>
+          <Label htmlFor="showAsNow">Show as &quot;now&quot;</Label>
         </div>
         {!useCurrentTime && !showAsNow && (
           <div>
