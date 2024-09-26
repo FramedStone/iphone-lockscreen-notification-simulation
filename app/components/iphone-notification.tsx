@@ -49,6 +49,13 @@ export default function IPhoneNotification() {
     setNotifications(notifications.filter((n) => n.id !== id));
   };
 
+  const swapNotifications = (fromIndex: number, toIndex: number) => {
+    const newNotifications = [...notifications];
+    const [removed] = newNotifications.splice(fromIndex, 1);
+    newNotifications.splice(toIndex, 0, removed);
+    setNotifications(newNotifications);
+  };
+
   const handleScrollbarDrag = (percentage: number) => {
     setNotificationYOffset(Math.round(percentage * 932));
   };
@@ -165,6 +172,7 @@ export default function IPhoneNotification() {
               <NotificationList
                 notifications={notifications}
                 onRemoveNotification={removeNotification}
+                onSwapNotifications={swapNotifications}
                 notificationYOffset={notificationYOffset}
               />
             </div>

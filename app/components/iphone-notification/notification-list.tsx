@@ -1,4 +1,5 @@
-import { formatTimestamp } from "@/app/lib/utils";
+import React, { useState, useRef } from "react";
+import { formatTimestamp } from "@/lib/utils";
 
 interface Notification {
   id: string;
@@ -12,23 +13,72 @@ interface Notification {
 interface NotificationListProps {
   notifications: Notification[];
   onRemoveNotification: (id: string) => void;
+  onSwapNotifications: (fromIndex: number, toIndex: number) => void;
   notificationYOffset: number;
 }
 
 export function NotificationList({
   notifications,
   onRemoveNotification,
+  onSwapNotifications,
   notificationYOffset,
 }: NotificationListProps) {
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const draggedItemRef = useRef<HTMLDivElement | null>(null);
+  const dragStartY = useRef<number>(0);
+
+  const handleDragStart = (
+    e: React.MouseEvent<HTMLDivElement>,
+    index: number
+  ) => {
+    setDraggingIndex(index);
+    dragStartY.current = e.clientY;
+    draggedItemRef.current = e.currentTarget;
+    if (draggedItemRef.current) {
+      draggedItemRef.current.style.opacity = "0.5";
+    }
+  };
+
+  const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (draggingIndex === null || !draggedItemRef.current) return;
+
+    const deltaY = e.clientY - dragStartY.current;
+    draggedItemRef.current.style.transform = `translateY(${deltaY}px)`;
+
+    const itemHeight = draggedItemRef.current.offsetHeight;
+    const swapThreshold = itemHeight / 2;
+
+    if (Math.abs(deltaY) > swapThreshold) {
+      const newIndex = draggingIndex + (deltaY > 0 ? 1 : -1);
+      if (newIndex >= 0 && newIndex < notifications.length) {
+        onSwapNotifications(draggingIndex, newIndex);
+        setDraggingIndex(newIndex);
+        dragStartY.current = e.clientY;
+      }
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (draggedItemRef.current) {
+      draggedItemRef.current.style.opacity = "1";
+      draggedItemRef.current.style.transform = "translateY(0)";
+    }
+    setDraggingIndex(null);
+  };
+
   return (
     <div
       className="absolute inset-x-0 space-y-4 px-4"
       style={{ top: `${notificationYOffset}px` }}
     >
-      {notifications.map((notification) => (
+      {notifications.map((notification, index) => (
         <div
           key={notification.id}
-          className="bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg p-4 cursor-pointer"
+          className="bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg p-4 cursor-move"
+          onMouseDown={(e) => handleDragStart(e, index)}
+          onMouseMove={handleDrag}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
           onClick={() => onRemoveNotification(notification.id)}
         >
           <div className="flex items-start space-x-3">
