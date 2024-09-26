@@ -147,7 +147,7 @@ export default function IPhoneNotification() {
 
       <div className="flex items-start">
         <div
-          className="relative w-[430px] h-[932px] rounded-[68px] overflow-hidden shadow-xl bg-black"
+          className="relative w-[430px] h-[932px] rounded-[68px] overflow-hidden shadow-xl bg-black iphone-frame"
           style={{ boxShadow: "0 0 0 4px rgba(0,0,0,0.7)" }}
         >
           <div className="absolute inset-0 overflow-hidden">
