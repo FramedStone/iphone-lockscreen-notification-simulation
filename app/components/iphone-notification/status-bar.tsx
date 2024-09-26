@@ -19,10 +19,10 @@ export function StatusBar({ mobileNetwork, statusBarPadding }: StatusBarProps) {
           <div className="w-[3px] h-3 bg-white"></div>
           <div className="w-[3px] h-4 bg-white"></div>
         </div>
-        <Wifi className="h-4 w-4" />
-        <div className="w-8 h-4 border-2 border-white rounded-sm relative">
+        <Wifi className="h-5 w-5 stroke-[3]" />
+        <div className="w-8 h-4 border border-white rounded-sm relative">
           <div className="absolute top-0.5 bottom-0.5 left-0.5 right-2 bg-white"></div>
-          <div className="absolute right-[-4px] top-1/2 transform -translate-y-1/2 w-1 h-2 bg-white"></div>
+          <div className="absolute right-[-2px] top-1/2 transform -translate-y-1/2 w-0.5 h-2 bg-white"></div>
         </div>
       </div>
     </div>
