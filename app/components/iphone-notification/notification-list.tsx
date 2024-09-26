@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { formatTimestamp } from "@/lib/utils";
 import {
   AlertDialog,
@@ -37,6 +37,7 @@ export function NotificationList({
   const [deletingNotification, setDeletingNotification] =
     useState<Notification | null>(null);
   const draggedItemRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const dragStartX = useRef<number>(0);
   const dragStartY = useRef<number>(0);
   const isDragging = useRef(false);
@@ -61,7 +62,8 @@ export function NotificationList({
       if (
         draggingIndex === null ||
         !draggedItemRef.current ||
-        !isDragging.current
+        !isDragging.current ||
+        !listRef.current
       )
         return;
 
@@ -70,7 +72,7 @@ export function NotificationList({
       draggedItemRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
       // Check if dragged out of the iPhone frame
-      const iPhoneFrame = draggedItemRef.current.closest(".iphone-frame");
+      const iPhoneFrame = listRef.current.closest(".iphone-frame");
       if (iPhoneFrame) {
         const frameRect = iPhoneFrame.getBoundingClientRect();
         const itemRect = draggedItemRef.current.getBoundingClientRect();
@@ -83,20 +85,23 @@ export function NotificationList({
         ) {
           setDeletingNotification(notifications[draggingIndex]);
           handleDragEnd();
+          return;
         }
       }
 
       // Swapping logic
       const itemHeight = draggedItemRef.current.offsetHeight;
-      const swapThreshold = itemHeight / 2;
+      const listRect = listRef.current.getBoundingClientRect();
+      const draggedItemTop = itemRect.top - listRect.top + deltaY;
+      const newIndex = Math.floor(draggedItemTop / itemHeight);
 
-      if (Math.abs(deltaY) > swapThreshold) {
-        const newIndex = draggingIndex + (deltaY > 0 ? 1 : -1);
-        if (newIndex >= 0 && newIndex < notifications.length) {
-          onSwapNotifications(draggingIndex, newIndex);
-          setDraggingIndex(newIndex);
-          dragStartY.current = e.clientY;
-        }
+      if (
+        newIndex !== draggingIndex &&
+        newIndex >= 0 &&
+        newIndex < notifications.length
+      ) {
+        onSwapNotifications(draggingIndex, newIndex);
+        setDraggingIndex(newIndex);
       }
     },
     [draggingIndex, notifications, onSwapNotifications]
@@ -119,10 +124,24 @@ export function NotificationList({
     }
   }, [deletingNotification, onRemoveNotification]);
 
+  useEffect(() => {
+    const handleMouseUp = () => {
+      if (isDragging.current) {
+        handleDragEnd();
+      }
+    };
+
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleDragEnd]);
+
   return (
     <>
       <div
-        className="absolute inset-x-0 space-y-4 px-4 iphone-frame"
+        ref={listRef}
+        className="absolute inset-x-0 space-y-4 px-4"
         style={{ top: `${notificationYOffset}px` }}
       >
         {notifications.map((notification, index) => (
@@ -131,8 +150,6 @@ export function NotificationList({
             className="bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg p-4 cursor-move"
             onMouseDown={(e) => handleDragStart(e, index)}
             onMouseMove={handleDrag}
-            onMouseUp={handleDragEnd}
-            onMouseLeave={handleDragEnd}
           >
             <div className="flex items-start space-x-3">
               <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
