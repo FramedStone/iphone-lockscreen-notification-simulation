@@ -30,6 +30,12 @@ export default function IPhoneNotification() {
   const [backgroundBlur, setBackgroundBlur] = useState(0);
   const [backgroundSize, setBackgroundSize] = useState(100);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [customDate, setCustomDate] = useState(
+    currentTime.toISOString().split("T")[0]
+  );
+  const [customTime, setCustomTime] = useState(
+    currentTime.toTimeString().slice(0, 5)
+  );
   const [statusBarPadding, setStatusBarPadding] = useState(33);
   const [dynamicIslandMargin, setDynamicIslandMargin] = useState(15);
   const [bottomIconsPadding, setBottomIconsPadding] = useState(8);
@@ -83,6 +89,16 @@ export default function IPhoneNotification() {
     setNotificationYOffset(Math.round(percentage * 932));
   }, []);
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomDate(e.target.value);
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomTime(e.target.value);
+  };
+
+  const displayTime = new Date(`${customDate}T${customTime}`);
+
   return (
     <div className="flex items-start justify-center min-h-screen bg-gray-100 p-8">
       <div className="w-full max-w-md space-y-4 mr-8 text-black">
@@ -96,6 +112,30 @@ export default function IPhoneNotification() {
             onChange={(e) => setMobileNetwork(e.target.value)}
             placeholder="Enter mobile network name"
             className="text-black placeholder-gray-500"
+          />
+        </div>
+        <div>
+          <Label htmlFor="custom-date" className="text-black">
+            Date:
+          </Label>
+          <Input
+            id="custom-date"
+            type="date"
+            value={customDate}
+            onChange={handleDateChange}
+            className="text-black"
+          />
+        </div>
+        <div>
+          <Label htmlFor="custom-time" className="text-black">
+            Time:
+          </Label>
+          <Input
+            id="custom-time"
+            type="time"
+            value={customTime}
+            onChange={handleTimeChange}
+            className="text-black"
           />
         </div>
         <BackgroundImageUpload onImageChange={setBackgroundImage} />
@@ -193,7 +233,7 @@ export default function IPhoneNotification() {
             <DynamicIsland dynamicIslandMargin={dynamicIslandMargin} />
 
             <div className="flex-1 flex flex-col justify-between p-8">
-              <LockScreen currentTime={currentTime} />
+              <LockScreen currentTime={displayTime} />
               <NotificationList
                 notifications={notifications}
                 onRemoveNotification={removeNotification}
