@@ -35,8 +35,6 @@ export default function IPhoneNotification() {
   const [bottomIconsPadding, setBottomIconsPadding] = useState(8);
   const [notificationYOffset, setNotificationYOffset] = useState(200);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [dateFormat, setDateFormat] = useState("EEEE, MMMM d");
-  const [timeFormat, setTimeFormat] = useState("HH:mm");
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -167,30 +165,6 @@ export default function IPhoneNotification() {
             className="text-black"
           />
         </div>
-        <div>
-          <Label htmlFor="dateFormat" className="text-black">
-            Date Format
-          </Label>
-          <Input
-            id="dateFormat"
-            value={dateFormat}
-            onChange={(e) => setDateFormat(e.target.value)}
-            placeholder="Enter date format"
-            className="text-black placeholder-gray-500"
-          />
-        </div>
-        <div>
-          <Label htmlFor="timeFormat" className="text-black">
-            Time Format
-          </Label>
-          <Input
-            id="timeFormat"
-            value={timeFormat}
-            onChange={(e) => setTimeFormat(e.target.value)}
-            placeholder="Enter time format"
-            className="text-black placeholder-gray-500"
-          />
-        </div>
         <NotificationForm onAddNotification={addNotification} />
       </div>
 
@@ -219,11 +193,7 @@ export default function IPhoneNotification() {
             <DynamicIsland dynamicIslandMargin={dynamicIslandMargin} />
 
             <div className="flex-1 flex flex-col justify-between p-8">
-              <LockScreen
-                currentTime={currentTime}
-                dateFormat={dateFormat}
-                timeFormat={timeFormat}
-              />
+              <LockScreen currentTime={currentTime} />
               <NotificationList
                 notifications={notifications}
                 onRemoveNotification={removeNotification}
