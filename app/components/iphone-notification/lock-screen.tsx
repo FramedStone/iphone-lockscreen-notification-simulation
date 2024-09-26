@@ -1,28 +1,23 @@
+import React from "react";
+import { format } from "date-fns";
+
 interface LockScreenProps {
   currentTime: Date;
+  dateFormat: string;
+  timeFormat: string;
 }
 
-export function LockScreen({ currentTime }: LockScreenProps) {
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
-
+export function LockScreen({
+  currentTime,
+  dateFormat,
+  timeFormat,
+}: LockScreenProps) {
   return (
-    <div className="text-white text-center mt-4">
-      <div className="text-2xl font-light mb-2">{formatDate(currentTime)}</div>
-      <div className="text-8xl font-bold">{formatTime(currentTime)}</div>
+    <div className="text-center text-white">
+      <div className="text-6xl font-thin mb-2">
+        {format(currentTime, timeFormat)}
+      </div>
+      <div className="text-lg">{format(currentTime, dateFormat)}</div>
     </div>
   );
 }
