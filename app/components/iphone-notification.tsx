@@ -11,6 +11,7 @@ import { BottomIcons } from "./iphone-notification/bottom-icons";
 import { DraggableScrollbar } from "./iphone-notification/draggable-scrollbar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 
 interface Notification {
   id: string;
@@ -26,6 +27,7 @@ export default function IPhoneNotification() {
   const [backgroundImage, setBackgroundImage] = useState(
     "/placeholder.svg?height=932&width=430"
   );
+  const [backgroundBlur, setBackgroundBlur] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [statusBarPadding, setStatusBarPadding] = useState(33);
   const [dynamicIslandMargin, setDynamicIslandMargin] = useState(15);
@@ -66,6 +68,21 @@ export default function IPhoneNotification() {
           />
         </div>
         <BackgroundImageUpload onImageChange={setBackgroundImage} />
+        <div>
+          <Label htmlFor="backgroundBlur" className="text-black">
+            Background Blur
+          </Label>
+          <Slider
+            id="backgroundBlur"
+            min={0}
+            max={20}
+            step={1}
+            value={[backgroundBlur]}
+            onValueChange={(value) => setBackgroundBlur(value[0])}
+            className="my-2"
+          />
+          <div className="text-sm text-gray-500">{backgroundBlur}px</div>
+        </div>
         <div>
           <Label htmlFor="statusBarPadding" className="text-black">
             Status Bar Padding (px)
@@ -114,6 +131,7 @@ export default function IPhoneNotification() {
             src={backgroundImage}
             alt="iPhone background"
             className="absolute inset-0 w-full h-full object-cover"
+            style={{ filter: `blur(${backgroundBlur}px)` }}
           />
           <div className="absolute inset-0 flex flex-col">
             <StatusBar
